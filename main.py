@@ -26,6 +26,30 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
+import requests
+import base64
+
+class FacePlus:
+    def __init__(self,key,secret):
+        self.key = key
+        self.secret = secret
+        self.endpoint = 'https://api-us.faceplusplus.com'
+    
+    def judge_face(self,path):
+        img_file = base64.encodestring(open(path, 'rb').read())
+        response = requests.post(
+            self.endpoint + '/facepp/v3/detect',
+            {
+                'Content-Type': 'multipart/from-data',
+                'api_key': self.key,
+                'api_secret': self.secret,
+                'image_base64': img_file,
+                'return_attributes': 'gender,age,headpose,facequality,eyestatus,emotion,ethnicity,beauty,mouthstatus'
+
+            }
+        )
+        result = response.json()
+        return result["faces"][0]["attributes"]["beauty"]["female_score"]
 
 app = Flask(__name__)
 
@@ -68,6 +92,21 @@ def message_text(event):
         TextSendMessage(text=event.message.text)
     )
 
+@handler.add(MessageEvent, message=TextMessage)
+def handle_image(event):
+    message_content = line_bot_api.get_message_content(event.message.id)
+
+    key = os.getenv('FACEPP_KEY', None)
+    secret = os.getenv('FACEPP_SECRET', None)
+
+    with open("static/" + event.message.id + ".jpg","wb") as f:
+        f.write(message_content.content)
+
+        fp = FacePlus(key,secret)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(text=fp.judge_face(f))
+        )
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT",5000))
