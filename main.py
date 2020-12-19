@@ -26,6 +26,7 @@ from linebot.exceptions import (
 from linebot.models import (
     MessageEvent, TextMessage, TextSendMessage,
 )
+from pathlib import Path
 import requests
 import base64
 
@@ -66,6 +67,17 @@ if channel_access_token is None:
 line_bot_api = LineBotApi(channel_access_token)
 handler = WebhookHandler(channel_secret)
 
+fpp_key = os.getenv('FACEPP_KEY', None)
+fpp_secret = os.getenv('FACEPP_SECRET', None)
+
+if fpp_key is None:
+    print('Specify FACEPP_KEY as environment variable.')
+    sys.exit(1)
+if fpp_secret is None:
+    print('Specify FACEPP_SECRET as environment variable.')
+    sys.exit(1)
+
+SRC_IMAGE_PATH = "static/images/{}.jpg"
 
 @app.route("/callback", methods=['POST'])
 def callback():
@@ -95,18 +107,26 @@ def callback():
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     message_id = event.message.id
-    message_content = line_bot_api.get_message_content(message_id)
+    
+    src_image_path = Path(SRC_IMAGE_PATH.format(message_id)).absolute()
 
-    key = os.getenv('FACEPP_KEY', None)
-    secret = os.getenv('FACEPP_SECRET', None)
+    save_image(message_id, src_image_path)
 
     # with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
 
-    fp = FacePlus(key,secret)
+    fp = FacePlus(fpp_key,fpp_secret)
     line_bot_api.reply_message(
         event.reply_token,
-        TextSendMessage(text=fp.judge_face(message_content))
+        TextSendMessage(text=fp.judge_face(src_image_path))
     )
+
+def save_image(message_id: str, save_path: str) -> None:
+    """保存"""
+    message_content = line_bot_api.get_message_content(message_id)
+    with open(save_path, "wb") as f:
+        for chunk in message_content.iter_content():
+            f.write(chunk)
+
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT",5000))
