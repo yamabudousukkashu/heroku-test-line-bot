@@ -104,6 +104,7 @@ def callback():
 #         TextSendMessage(text=event.message.text)
 #     )
 
+#画像
 @handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
     message_id = event.message.id
