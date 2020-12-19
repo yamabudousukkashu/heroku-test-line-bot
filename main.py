@@ -92,15 +92,15 @@ def callback():
 #         TextSendMessage(text=event.message.text)
 #     )
 
-@handler.add(MessageEvent, message=TextMessage)
+@handler.add(MessageEvent, message=ImageMessage)
 def handle_image(event):
-    message_content = line_bot_api.get_message_content(event.message.id)
+    message_id = event.message.id
+    message_content = line_bot_api.get_message_content(message_id)
 
     key = os.getenv('FACEPP_KEY', None)
     secret = os.getenv('FACEPP_SECRET', None)
 
-    with open("static/" + event.message.id + ".jpg","wb") as f:
-        f.write(message_content.content)
+    with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
 
         fp = FacePlus(key,secret)
         line_bot_api.reply_message(
