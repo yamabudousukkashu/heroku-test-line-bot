@@ -105,28 +105,30 @@ def message_text(event):
     )
 
 #画像を入れる
-# @handler.add(MessageEvent, message=ImageMessage)
-# def handle_image(event):
-#     message_id = event.message.id
+@handler.add(MessageEvent, message=ImageMessage)
+def handle_image(event):
+    message_id = event.message.id
     
-#     src_image_path = Path(SRC_IMAGE_PATH.format(message_id)).absolute()
+    src_image_path = Path(SRC_IMAGE_PATH.format(message_id)).absolute()
 
-#     save_image(message_id, src_image_path)
+    save_image(message_id, src_image_path)
 
-#     # with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
+    # with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
 
-#     fp = FacePlus(fpp_key,fpp_secret)
-#     line_bot_api.reply_message(
-#         event.reply_token,
-#         TextSendMessage(text=fp.judge_face(src_image_path))
-#     )
+    fp = FacePlus(fpp_key,fpp_secret)
+    src_image_path = base64.b64encode(src_image_path)
+    msg = fp.judge_face(src_image_path)
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=msg)
+    )
 
-# def save_image(message_id: str, save_path: str) -> None:
-#     """保存"""
-#     message_content = line_bot_api.get_message_content(message_id)
-#     with open(save_path, "wb") as f:
-#         for chunk in message_content.iter_content():
-#             f.write(chunk)
+def save_image(message_id: str, save_path: str) -> None:
+    """保存"""
+    message_content = line_bot_api.get_message_content(message_id)
+    with open(save_path, "wb") as f:
+        for chunk in message_content.iter_content():
+            f.write(chunk)
 
 
 if __name__ == "__main__":
