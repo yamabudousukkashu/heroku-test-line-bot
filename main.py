@@ -100,13 +100,13 @@ def handle_image(event):
     key = os.getenv('FACEPP_KEY', None)
     secret = os.getenv('FACEPP_SECRET', None)
 
-    with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
+    # with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
 
-        fp = FacePlus(key,secret)
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage(text=fp.judge_face(f))
-        )
+    fp = FacePlus(key,secret)
+    line_bot_api.reply_message(
+        event.reply_token,
+        TextSendMessage(text=fp.judge_face(message_content))
+    )
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT",5000))
