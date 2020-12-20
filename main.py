@@ -77,7 +77,7 @@ if fpp_secret is None:
     print('Specify FACEPP_SECRET as environment variable.')
     sys.exit(1)
 
-SRC_IMAGE_PATH = "/static/images/{}.jpg"
+SRC_IMAGE_PATH = "static/images/{}.jpg"
 
 @app.route("/callback", methods=['POST'])
 def callback():
