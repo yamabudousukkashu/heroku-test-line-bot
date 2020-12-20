@@ -116,7 +116,7 @@ def handle_image(event):
     # with open(Path(f"static/"{message_id}".jpg").absolute(),"wb") as f:
 
     fp = FacePlus(fpp_key,fpp_secret)
-    src_image_path = base64.b64encode(src_image_path)
+    # src_image_path = base64.b64encode(src_image_path)
     msg = fp.judge_face(src_image_path)
     line_bot_api.reply_message(
         event.reply_token,
